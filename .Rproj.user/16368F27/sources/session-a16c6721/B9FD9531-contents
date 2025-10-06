@@ -1,0 +1,905 @@
+---
+title: "Restart: tableaux de données"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+css: "www/style_tuto_learnr.css"
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(gradethis)
+
+Sys.setlocale("LC_ALL", "fr_FR.UTF-8")
+gradethis_setup()
+ 
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+![](www/grimoire.png){width=70px}<a href="http://perso.ens-lyon.fr/lise.vaudor/Supports_formation/Restart_4_tableaux_de_donnees.html#(1)" target="_blank">Cliquer ici pour les diapos de cours</a>
+
+## 4.1 Lire une tibble
+
+![](www/marmite.png){width=70px}Dans la suite des exercices concernant la manipulation de tableaux de données nous allons utiliser le tableau `potions` disponible <a href="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv" target="_blank">ici</a>.
+
+Le jeu de données potions recense un certain nombre de **potions magiques** pour lesquelles sont renseignées:
+
+- des **quantités d’ingrédients** (noms de variables commençant par `i_`)
+- des **scores** relatifs aux **propriétés magiques** des potions (noms de variables commençant par `p_`)
+- des **modalités d’élaboration** des potions (noms de variables commençant par `m_`)
+
+Parmi les **ingrédients**, on peut citer par exemple 
+
+- `i_aile_papillon` des ailes de papillon
+- `i_bave_crapaud` de la bave de crapaud
+- `i_pierre_lune` de la pierre de lune
+
+etc.
+
+En terme de **propriétés** on a relevé si les potions permettent
+
+- `p_alteration`: d’altérer l’apparence, de transformer en plante verte ou en limace
+- `p_transformation`: de se transformer soi-même, en loup-garou, troll ou beau gosse
+- `p_conjuration`: de conjurer des esprits ou des morts-vivants
+- `p_destruction`: de lancer des éclairs, des boules de feu ou des pics de glace
+- `p_invisibilite`: de devenir invisible
+- `p_resistance`: de se protéger des attaques 
+
+Quant aux modalités d’élaboration des potions, elles décrivent:
+
+- `m_formule`: la **langue de la formule magique** associée à la confection de la potion (si une formule est nécessaire)
+- `m_preparation`: si la préparation correspond à un bouillon, une macération ou une distillation des ingrédients.
+
+Utilisez la fonction `read_csv()` ou `read_delim()`(du package `readr`) pour lire cette table et assignez-la à un objet `potions`.
+
+
+```{r read_tib, exercise=TRUE, exercise.lines=6}
+path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::________
+head(potions)
+```
+
+```{r read_tib-solution}
+path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+head(potions)
+```
+
+```{r read_tib-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+  potions <- readr::read_delim(path,
+                               delim=";", show_col_types=FALSE)
+  if(!"potions" %in% ls(envir=.envir_result)){
+    fail("Le tableau `potions` n'a pas été créé.")
+  }
+  # if(!identical(.envir_result[["potions"]],potions)){
+  #   fail("Votre table `potions` ne correspond pas à la table attendue. Etes-vous sûr du séparateur de colonne?")
+  # }
+  pass("Très bien! Vous l'avez vu, le séparateur de colonnes dans notre fichier était ici un point-virgule.")
+})
+```
+
+## 4.2 Sélectionner des colonnes
+
+La fonction `select()` permet de sélectionner des colonnes d'un tableau de données.
+
+Le tableau `potions` et le package `dplyr` ont déjà été chargés dans l'environnement ci-dessous. Ce sera pour l'ensemble des exercices des parties 4 et 5.
+
+Examinez la table `potions`. Complétez le code pour sélectionner :
+
+
+```{r label="dplyrsetup", echo=FALSE}
+path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions=readr::read_delim(path, delim=";")
+library(dplyr)
+```
+
+- les variables `m_formule`, `i_bave_crapaud`, et `p_destruction`
+
+```{r select_tib_1, exercise=TRUE, exercise.lines=3, exercise.setup="dplyrsetup"}
+pot <- select(potions,_______)
+head(pot)
+```
+
+
+```{r select_tib_1-solution}
+pot <- select(potions,m_formule,i_bave_crapaud,p_destruction)
+head(pot)
+```
+
+```{r select_tib_1-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- select(potions,m_formule,i_bave_crapaud,p_destruction)
+if(!stringr::str_detect(.user_code,"select")){
+    fail("Vous n'avez pas utilisé la fonction `select()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Yes!")
+})
+```
+
+- toutes les variables SAUF `i_graisse_troll` et `p_conjuration`
+
+```{r select_tib_2, exercise=TRUE, exercise.lines=3, exercise.setup="dplyrsetup"}
+pot <- select(_______________)
+head(pot)
+```
+
+
+```{r select_tib_2-solution}
+pot <- select(potions,-i_graisse_troll,-p_conjuration)
+head(pot)
+```
+
+
+```{r select_tib_2-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- select(potions,-i_graisse_troll,-p_conjuration)
+  if(!stringr::str_detect(.user_code,"select")){
+    fail("Vous n'avez pas utilisé la fonction `select()`")
+  }
+  if(!stringr::str_detect(.user_code,"-")){
+    fail("Vous n'avez pas utilisé la notation `-var`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Impec!")
+})
+```
+
+- toutes les variables de `m_formule` à `i_ectoplasme`
+
+```{r select_tib_3, exercise=TRUE, exercise.lines=3, exercise.setup="dplyrsetup"}
+pot <- ______(_______________)
+head(pot)
+```
+
+
+```{r select_tib_3-solution}
+pot <- select(potions,m_formule:i_ectoplasme)
+head(pot)
+```
+
+```{r select_tib_3-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- select(potions,m_formule:i_ectoplasme)
+if(!stringr::str_detect(.user_code,"select")){
+    fail("Vous n'avez pas utilisé la fonction `select()`")
+  }
+  if(!stringr::str_detect(.user_code,":")){
+    fail("Vous n'avez pas utilisé la notation var_i:var_j")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Parfait!")
+})
+```
+
+- toutes les variables de type ingrédient (qui commencent par le motif "i_"), à l'aide de `starts_with()`
+
+  
+```{r select_tib_4, exercise=TRUE, exercise.lines=3, exercise.setup="dplyrsetup"}
+pot <- _______________________
+head(pot)
+```
+
+```{r select_tib_4-solution}
+pot <- select(potions,starts_with("i_"))
+head(pot)
+```
+
+```{r select_tib_4-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- select(potions,starts_with("i_"))
+  if(!stringr::str_detect(.user_code,"select")){
+    fail("Vous n'avez pas utilisé la fonction `select()`")
+  }
+  if(!stringr::str_detect(.user_code,"starts_with")){
+    fail("Vous n'avez pas utilisé l'auxiliaire `starts_with()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Super!")
+})
+```
+
+
+## 4.3 Filtrer des lignes
+
+Examinez la table `potions`. Complétez le code pour filtrer les lignes et ne garder que:
+
+- les potions dont la **préparation** correspond à une **macération** des ingrédients
+
+```{r filter_tib_1, exercise=TRUE, exercise.lines=3, exercise.setup="dplyrsetup"}
+pot <- filter(____)
+head(pot)
+```
+
+```{r filter_tib_1-solution}
+pot <- filter(potions, m_preparation=="maceration")
+head(pot)
+```
+
+```{r filter_tib_1-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- filter(potions, m_preparation=="maceration")
+  if(!stringr::str_detect(.user_code,"filter")){
+    fail("Vous n'avez pas utilisé la fonction `filter()`")
+  }
+  if(!stringr::str_detect(.user_code,"(==)|(%in%)")){
+    fail("Avez-vous bien utilisé la notation `==` ou `%in%`?")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Très bien!")
+})
+```
+
+
+- les potions dont le **pouvoir invisibilisant** est fort (>15) tout en conférant une **résistance** correcte (>10).
+
+```{r filter_tib_2, exercise=TRUE, exercise.lines=3, exercise.setup="dplyrsetup"}
+pot <- _____
+head(pot)
+```
+
+```{r filter_tib_2-solution}
+pot <- filter(potions, p_invisibilite>15,p_resistance>10)
+head(pot)
+```
+
+
+```{r filter_tib_2-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- filter(potions, p_invisibilite>15,p_resistance>10)
+  if(!stringr::str_detect(.user_code,"filter")){
+    fail("Vous n'avez pas utilisé la fonction `filter()`")
+  }
+  if(!stringr::str_detect(.user_code,">")){
+    fail("Avez-vous bien utilisé la notation `>` pour l'opérateur logique `est supérieur à`?")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Oui!!")
+})
+```
+
+
+## 4.4 Arranger les lignes
+
+La fonction `arrange()` permet de réordonner les lignes d'un tableau.
+
+
+
+Complétez le code pour **réarranger** les tableaux par **valeurs de variables**. Pensez à utiliser (si nécessaire) la **fonction auxiliaire** `desc()` pour ranger les valeurs dans l'ordre décroissant.
+
+Ordonnez la table `potions` par :
+
+- p_resistance
+
+
+```{r arrange_tib_1, exercise=TRUE, exercise.lines=3, exercise.setup="dplyrsetup"}
+pot <- arrange(potions,_____)
+head(pot)
+```
+
+```{r, arrange_tib_1-solution}
+pot <- arrange(potions,p_resistance)
+head(pot)
+```
+
+```{r arrange_tib_1-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- arrange(potions,p_resistance)
+  if(!stringr::str_detect(.user_code,"arrange")){
+    fail("Vous n'avez pas utilisé la fonction `arrange()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Tout-à-fait!")
+})
+```
+
+- m_formule
+
+```{r arrange_tib_2, exercise=TRUE, exercise.lines=3, exercise.setup="dplyrsetup"}
+pot  <- arrange(_____________)
+head(pot)
+```
+
+```{r, arrange_tib_2-solution}
+pot  <- arrange(potions, m_formule)
+head(pot)
+```
+
+```{r arrange_tib_2-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot  <- arrange(potions, m_formule)
+  if(!stringr::str_detect(.user_code,"arrange")){
+    fail("Vous n'avez pas utilisé la fonction `arrange()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Très bien!")
+})
+```
+
+
+- m_formule et p_resistance
+
+```{r arrange_tib_3, exercise=TRUE, exercise.lines=3, exercise.setup="dplyrsetup"}
+pot <-  _____(_________________)
+head(pot)
+```
+
+```{r, arrange_tib_3-solution}
+pot <-  arrange(potions, m_formule, p_resistance)
+head(pot)
+```
+
+```{r arrange_tib_3-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <-  arrange(potions, m_formule, p_resistance)
+  if(!stringr::str_detect(.user_code,"arrange")){
+    fail("Vous n'avez pas utilisé la fonction `arrange()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Très bien!")
+})
+```
+
+- m_formule dans l'ordre alphabétique, et p_resistance décroissant
+
+```{r arrange_tib_4, exercise=TRUE, exercise.lines=3, exercise.setup="dplyrsetup"}
+pot <- ___________________________
+head(pot)
+```
+
+```{r, arrange_tib_4-solution}
+pot <- arrange(potions, m_formule, desc(p_resistance))
+head(pot)
+```
+
+```{r arrange_tib_4-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- arrange(potions, m_formule, desc(p_resistance))
+  if(!stringr::str_detect(.user_code,"arrange")){
+    fail("Vous n'avez pas utilisé la fonction `arrange()`")
+  }
+  if(!stringr::str_detect(.user_code,"desc")){
+    fail("Il semble que vous n'ayez pas utilisé l'auxiliaire `desc()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("En effet!")
+})
+```
+
+## 4.5 Transformer le tableau
+
+La fonction `mutate()` permet de créer et ajouter de nouvelles variables à un tableau.
+
+Le tableau `potions` et le package `dplyr` a déjà été chargé dans l'environnement ci-dessous.
+
+Complétez le code pour créer de nouvelles variables.
+
+- L'ingrédient "pierre de lune" est dans une unité peu adaptée (picomètre cube par litre de potion). Transformez la colonne `i_pierre_lune` pour que sa nouvelle unité soit des millimètres cube par litre de potion. 
+
+
+```{r mutate_tib_1, exercise=TRUE, exercise.lines=4, exercise.setup="dplyrsetup"}
+pot=mutate(potions,
+           ____=____/1e+27)
+head(pot)
+```
+
+```{r mutate_tib_1-solution}
+pot=mutate(potions,
+           i_pierre_lune=i_pierre_lune/1e+27)
+head(pot)
+```
+
+```{r mutate_tib_1-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot=mutate(potions,
+              i_pierre_lune=i_pierre_lune/1e+27)
+  if(!stringr::str_detect(.user_code,"mutate")){
+    fail("Vous n'avez pas utilisé la fonction `mutate()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("C'est ça!")
+})
+```
+
+- Il est particulièrement difficile de se procurer des larmes de crocodiles. Dans `pot2`, la nouvelle variable `rarete_ressource` prend les valeurs "oui" quand `i_larmes_crocodile>8` (et "non" dans le cas contraire).
+
+```{r mutate_tib_2, exercise=TRUE, exercise.lines=4, exercise.setup="dplyrsetup"}
+pot=mutate(potions,
+           _______=case_when(_____~____,
+                             _____~____))
+head(pot)
+```
+
+```{r mutate_tib_2-solution}
+pot=mutate(potions,
+           rarete_ressource=case_when(i_larmes_crocodile>8~"oui",
+                                      TRUE~"non"))
+head(pot)
+```
+
+```{r mutate_tib_2-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot=mutate(potions,
+           rarete_ressource=case_when(i_larmes_crocodile>8~"oui",
+                                      TRUE~"non"))
+  if(!stringr::str_detect(.user_code,"mutate")){
+    fail("Vous n'avez pas utilisé la fonction `mutate()`")
+  }
+  if(!stringr::str_detect(.user_code,"case_when")){
+    fail("Vous n'avez pas utilisé la fonction `case_when()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Parfait! Vous verrez, la fonction `case_when` (utilisée à la place de `ifelse`) est bien pratique...")
+})
+```
+
+## 4.6 Résumer l'information
+
+La fonction `summarise()` permet de résumer l'information contenue dans un tableau, éventuellement groupe par groupe (groupes définis à l'aide de la fonction auxiliaire `group_by()`).
+
+Complétez le code pour créer de nouveaux tableaux résumant une partie de l'information contenue dans `potions`.
+
+Pensez à la différence entre les fonctions auxiliaires `n()` et `n_distinct()`.
+
+- Calcul de la **moyenne** de `p_resistance`:
+
+```{r summary_tib_1, exercise=TRUE, exercise.lines=6, exercise.setup="dplyrsetup"}
+pot <- summarise(potions,
+                 moy_resistance=_______)
+head(pot)
+```
+
+
+```{r summary_tib_1-solution}
+pot <- summarise(potions,
+                 moy_resistance=mean(p_resistance))
+head(pot)
+```
+
+
+```{r summary_tib_1-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- summarise(potions,
+                   moy_resistance=mean(p_resistance))
+  if(!stringr::str_detect(.user_code,"summarise")){
+    fail("Vous n'avez pas utilisé la fonction `summarise()`")
+  }
+  if(!stringr::str_detect(.user_code,"mean")){
+    fail("Vous n'avez pas utilisé la fonction `mean()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Parfait. Vous venez de résumer l'ensemble du jeu de données en un coup de cuillère à pot!")
+})
+```
+
+- Calcul de la **moyenne** de `p_resistance` en fonction de `m_formule`:
+
+```{r summary_tib_2, exercise=TRUE, exercise.lines=6, exercise.setup="dplyrsetup"}
+pot <- _________(group_by(potions,______),
+                 moy_resistance=__________,
+                 ___)
+head(pot)
+```
+
+
+```{r summary_tib_2-solution}
+pot <- summarise(group_by(potions,m_formule),
+                 moy_resistance=mean(p_resistance))
+head(pot)
+```
+
+
+```{r summary_tib_2-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- summarise(group_by(potions,m_formule),
+                   moy_resistance=mean(p_resistance))
+  if(!stringr::str_detect(.user_code,"summarise")){
+    fail("Vous n'avez pas utilisé la fonction `summarise()`")
+  }
+  if(!stringr::str_detect(.user_code,"mean")){
+    fail("Vous n'avez pas utilisé la fonction `mean()`")
+  }
+  if(!stringr::str_detect(.user_code,"group_by")){
+    fail("Vous n'avez pas utilisé la fonction `group_by()`")
+  }
+  # if(!stringr::str_detect(.user_code,".groups")){
+  #   fail("Vous n'avez pas précisé la valeur de l'argument `.groups` dans l'appel à `summarise()`.")
+  # }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Parfait. Avec `group_by()` vous avez réalisé un traitement 'en boucle' sans même vous en rendre compte...")
+})
+```
+
+
+- Calcul de la **moyenne** de `p_resistance` (`moy_resistance`) et du **nombre de potions** (`nb_potions`) en fonction de `m_formule`:
+
+```{r summary_tib_3, exercise=TRUE, exercise.lines=6, exercise.setup="dplyrsetup"}
+pot <- ___________________________________
+head(pot)
+```
+
+```{r summary_tib_3-solution}
+pot <- summarise(group_by(potions,m_formule),
+                 moy_resistance=mean(p_resistance),
+                 nb_potions=n())
+head(pot)
+```
+
+```{r summary_tib_3-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- summarise(group_by(potions,m_formule),
+                 moy_resistance=mean(p_resistance),
+                 nb_potions=n())
+  if(!stringr::str_detect(.user_code,"summarise")){
+    fail("Vous n'avez pas utilisé la fonction `summarise()`")
+  }
+  if(!stringr::str_detect(.user_code,"mean")){
+    fail("Vous n'avez pas utilisé la fonction `mean()`")
+  }
+  if(!stringr::str_detect(.user_code,"=n\\(")){
+    fail("Vous n'avez pas utilisé la fonction `n()`")
+  }
+  if(!stringr::str_detect(.user_code,"group_by")){
+    fail("Vous n'avez pas utilisé la fonction `group_by()`")
+  }
+  # if(!stringr::str_detect(.user_code,".groups")){
+  #   fail("Vous n'avez pas précisé la valeur de l'argument `.groups` dans l'appel à `summarise()`.")
+  # }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Parfait. Votre tableau de résumé commence à avoir de l'allure!")
+})
+```
+
+
+- calcul de la **moyenne** de `p_resistance` et du **nombre de potions** en fonction de `m_formule` et de `m_preparation`:
+
+```{r summary_tib_4, exercise=TRUE, exercise.lines=6, exercise.setup="dplyrsetup"}
+pot <- ___________________________________
+head(pot)
+```
+
+```{r summary_tib_4-solution}
+pot <- summarise(group_by(potions,m_formule,m_preparation),
+                 moy_resistance=mean(p_resistance),
+                 nb_potions=n())
+head(pot)
+```
+
+```{r summary_tib_4-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- summarise(group_by(potions,m_formule,m_preparation),
+                 moy_resistance=mean(p_resistance),
+                 nb_potions=n())
+  if(!stringr::str_detect(.user_code,"summarise")){
+    fail("Vous n'avez pas utilisé la fonction `summarise()`")
+  }
+  if(!stringr::str_detect(.user_code,"mean")){
+    fail("Vous n'avez pas utilisé la fonction `mean()`")
+  }
+
+  if(!stringr::str_detect(.user_code,"=n\\(")){
+    fail("Vous n'avez pas utilisé la fonction `n()`")
+  }
+  if(!stringr::str_detect(.user_code,"group_by")){
+    fail("Vous n'avez pas utilisé la fonction `group_by()`")
+  }
+  # if(!stringr::str_detect(.user_code,".groups")){
+  #   fail("Vous n'avez pas précisé la valeur de l'argument `.groups` dans l'appel à `summarise()`.")
+  # }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Pas mal... puissante, la fonction `summarise()`, n'est-ce pas?")
+})
+```
+
+## 4.7 Chaînage
+
+L'utilisation de l'opérateur pipe (`%>%`) permet d'enchaîner plusieurs opérations de dplyr.
+
+La table potions compte **67 lignes** dont **9** ont une propriété invisibilisante supérieure à 20, et **14** requièrent l'usage d'une formule en elfique. La table potions compte par ailleur **17 colonnes** dont **9** relatives à des ingrédients.
+
+```{r dim_tib_commande, exercise=FALSE, eval=FALSE, echo=TRUE}
+pot <- potions %>%
+  filter(p_invisibilite>20 & m_formule=="elfique")%>%
+  select(starts_with("i_"))
+
+```
+
+
+```{r dim_tib}
+question("Etes vous capable de prédire quelle seront les dimensions du tableau résultant de la commande ci-dessus?",
+         answer("9 lignes x 17 colonnes"),
+         answer("9 lignes x 9 colonnes"),
+         answer("(au plus 9 lignes) x 9 colonnes", correct=TRUE),
+         answer("5 lignes x 9 colonnes"),
+         answer("(au plus 14 lignes) x 9 colonnes"),
+         correct="",
+         incorrect="Réflechissez à ce qu'implique cette condition d'un point de vue logique pour le nombre de lignes...",
+         allow_retry=TRUE)
+```
+
+## 4.8 Chaînage: on enchaîne, on enchaîne!
+
+Complétez les scripts ci-dessous. Gardez à l'esprit qu'en utilisant les `%>%` vous n'avez plus besoin de passer de table en premier argument...
+
+
+- on prend potions, puis
+- on **filtre** pour ne garder que les macérats, puis
+- on **sélectionne** les colonnes pour ne garder que les propriétés `p_...`, puis 
+- on **arrange** la table par **ordre décroissant** de `p_resistance`.
+
+
+```{r chainchain_1, exercise=TRUE, exercise.lines=7, exercise.setup="dplyrsetup"}
+pot <- potions %>%
+  filter(______) %>%
+  select(______) %>%
+  arrange(______)
+head(pot)
+```
+
+
+```{r chainchain_1-solution}
+pot <- potions %>%
+  filter(m_preparation=="maceration") %>%
+  select(starts_with("p_")) %>%
+  arrange(desc(p_resistance))
+head(pot)
+```
+
+
+```{r chainchain_1-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- potions %>%
+  filter(m_preparation=="maceration") %>%
+  select(starts_with("p_")) %>%
+  arrange(desc(p_resistance))
+  if(!stringr::str_detect(.user_code,"filter")){
+    fail("Vous n'avez pas utilisé la fonction `filter()`")
+  }
+  if(!stringr::str_detect(.user_code,"select")){
+    fail("Vous n'avez pas utilisé la fonction `select()`")
+  }
+  if(!stringr::str_detect(.user_code,"arrange")){
+    fail("Vous n'avez pas utilisé la fonction `arrange()`")
+  }
+  if(!stringr::str_detect(.user_code,"starts_with")){
+    fail("Vous n'avez pas utilisé l'auxiliaire `starts_with()`")
+  }
+  if(!stringr::str_detect(.user_code,"desc")){
+    fail("Vous n'avez pas utilisé l'auxiliaire `desc()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Bien! Vous commencez à bien enchaîner ;-) ")
+})
+```
+
+- on prend potions, puis
+- on **filtre** pour ne garder que les potions ne requérant pas l'usage d'une formule, puis
+- on **groupe** par type de préparation, puis
+- on **résume** l'information en calculant
+    - le **minimum** `min_inv`, 
+    - la **médiane** `med_inv` et 
+    - le **maximum** `max_inv`
+  de `p_invisibilite`.
+
+```{r chainchain_2, exercise=TRUE, exercise.lines=7, exercise.setup="dplyrsetup"}
+pot <- _____
+_____
+_____
+_____
+pot
+```
+
+```{r chainchain_2-solution}
+pot <- potions %>%
+  filter(m_formule=="aucune") %>%
+  group_by(m_preparation) %>%
+  summarise(min_inv=min(p_invisibilite),
+            med_inv=median(p_invisibilite),
+            max_inv=max(p_invisibilite))
+pot
+```
+
+
+```{r chainchain_2-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+  pot <- potions %>%
+  filter(m_formule=="aucune") %>%
+  group_by(m_preparation) %>%
+  summarise(min_inv=min(p_invisibilite),
+            med_inv=median(p_invisibilite),
+            max_inv=max(p_invisibilite))
+  if(!stringr::str_detect(.user_code,"filter")){
+    fail("Vous n'avez pas utilisé la fonction `filter()`")
+  }
+  if(!stringr::str_detect(.user_code,"group_by")){
+    fail("Vous n'avez pas utilisé la fonction `group_by()`")
+  }
+  if(!stringr::str_detect(.user_code,"min\\(")){
+    fail("Vous n'avez pas utilisé la fonction `min()`")
+  }
+  if(!stringr::str_detect(.user_code,"median\\(")){
+    fail("Vous n'avez pas utilisé la fonction `median()`")
+  }
+  if(!stringr::str_detect(.user_code,"max\\(")){
+    fail("Vous n'avez pas utilisé la fonction `max()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Superbe! Voilà de belles sessions de manipulation de tableaux qui s'annoncent!")
+})
+```
+
+
+## 4.9 Résumer plusieurs variables: across
+
+L'usage de l'auxiliaire `across()` permet de résumer l'information de la même façon pour toute une série de variables.
+
+Calculez la **moyenne de toutes les propriétés** en fonction du **mode de préparation** de la potion à l'aide de cet auxiliaire:
+
+
+```{r across, exercise=TRUE, exercise.lines=6, exercise.setup="dplyrsetup"}
+pot=potions %>% 
+  group_by(m_preparation) %>% 
+  summarise(_______)
+pot
+```
+
+
+```{r across-solution}
+pot=potions %>% 
+  group_by(m_preparation) %>% 
+  summarise(across(starts_with("p_"),mean))
+pot
+```
+
+```{r across-check}
+grade_this({
+  path="http://perso.ens-lyon.fr/lise.vaudor/grimoireStat/datasets/potions.csv"
+potions <- readr::read_delim(path,
+                             delim=";")
+ pot=potions %>% 
+  group_by(m_preparation) %>% 
+  summarise(across(starts_with("p_"),mean))
+  if(!stringr::str_detect(.user_code,"group_by")){
+    fail("Vous n'avez pas utilisé la fonction `group_by()`")
+  }
+  if(!stringr::str_detect(.user_code,"summarise")){
+    fail("Vous n'avez pas utilisé la fonction `arrange()`")
+  }
+  # if(!stringr::str_detect(.user_code,".groups")){
+  #   fail("Vous n'avez pas précisé la valeur de l'argument `.groups` dans l'appel à `summarise()`.")
+  # }
+  if(!stringr::str_detect(.user_code,"across")){
+    fail("Vous n'avez pas utilisé l'auxiliaire `across()`")
+  }
+   if(!stringr::str_detect(.user_code,"starts_with")){
+    fail("Vous n'avez pas utilisé l'auxiliaire `starts_with()`")
+  }
+  if(!identical(pot,.envir_result[["pot"]])){
+    fail("Le jeu de données en sortie est différent de ce que j'attendais.")
+  }
+  pass("Superbe! Voilà de belles sessions de manipulation de tableaux qui s'annoncent!")
+})
+```
+
+## 4.10 Allonger le tableau
+
+On veut reformer le tableau pour que l'**ensemble des propriétés apparaissent sur une même colonne**. On s'attend donc à un tableau avec une colonne `p_type` et une colonne `p_valeur`. 
+
+Utilisez la fonction `tidyr::pivot_longer()` pour réaliser cette opération.
+
+```{r pivot_longer,exercise=TRUE, exercise.lines=8, exercise.setup="dplyrsetup"}
+potions_long=potions %>% 
+  tidyr::pivot_longer(cols=______,
+               names_to=_______,
+               values_to=______)
+potions_long %>% head()
+potions_long
+```
+
+```{r pivot_longer-solution}
+potions_long=potions %>% 
+  tidyr::pivot_longer(cols=starts_with("p_"),
+               names_to="p_type",
+               values_to="p_valeur")
+potions_long %>% head()
+potions_long
+```
+
+```{r pivot_longer-check}
+grade_code("Bravo!! Vous verrez, le changement de format de large vers long (ou inversement) est particulièrement utile pour l'élaboration de graphiques...")
+```
