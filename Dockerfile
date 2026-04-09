@@ -20,7 +20,7 @@ RUN mkdir /app
 ADD . /app
 WORKDIR /app
 
-EXPOSE 3841
+EXPOSE 3840
 
 RUN groupadd -g 1010 app && useradd -c 'app' -u 1010 -g 1010 -m -d /home/app -s /sbin/nologin app
 USER app
