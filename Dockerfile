@@ -12,6 +12,10 @@ RUN Rscript -e 'install.packages("remotes")'
 RUN Rscript -e 'remotes::install_github("rstudio/gradethis")'
 RUN Rscript -e 'install.packages("dplyr")'
 RUN Rscript -e 'install.packages("readr")'
+RUN Rscript -e 'install.packages("tidyr")'
+RUN Rscript -e 'install.packages("stringr")'
+
+
 
 
 
